@@ -1,0 +1,2 @@
+D:/Dark_Mox-brocamp/mini_project/taskly_to_do_app/android/app/.cxx/Debug/a85d2g2h/x86/CMakeFiles/edit_cache.dir
+D:/Dark_Mox-brocamp/mini_project/taskly_to_do_app/android/app/.cxx/Debug/a85d2g2h/x86/CMakeFiles/rebuild_cache.dir
