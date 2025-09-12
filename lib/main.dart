@@ -3,8 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:taskly_to_do_app/core/presentation/navigation/app_router.dart';
 import 'package:taskly_to_do_app/core/presentation/pages/login_screen/login_screen.dart';
-import 'package:taskly_to_do_app/core/presentation/pages/signin_screen.dart';
-import 'package:taskly_to_do_app/core/presentation/pages/splash_screen/splash_screen.dart';
+
 // import 'package:taskly_to_do_app/core/presentation/utils/di.dart';
 import 'package:taskly_to_do_app/core/presentation/utils/theme.dart';
 
