@@ -1,19 +1,24 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:taskly_to_do_app/core/presentation/navigation/app_router.dart';
 import 'package:taskly_to_do_app/core/presentation/pages/login_screen/login_screen.dart';
 
 // import 'package:taskly_to_do_app/core/presentation/utils/di.dart';
 import 'package:taskly_to_do_app/core/presentation/utils/theme.dart';
-
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
+WidgetsFlutterBinding.ensureInitialized();
+await Firebase.initializeApp(
+  options: DefaultFirebaseOptions.currentPlatform,
+);
   // setPathUrlStrategy();
   // setupDependencies();
 
-  runApp(const MyApp());
+  runApp(const ProviderScope(child: MyApp()));
 }
 
 class MyApp extends StatelessWidget {

@@ -1,6 +1,5 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:taskly_to_do_app/core/presentation/utils/message_generator.dart';
@@ -61,14 +60,14 @@ class SignInScreen extends StatelessWidget {
                     child: Column(
                       children: [
                         Padding(
-                          padding: EdgeInsets.only(top: 8, left: 8),
+                          padding: const EdgeInsets.only(top: 8, left: 8),
                           child: Align(
                             alignment: Alignment.centerLeft,
                             child: GestureDetector(
                               onTap: () {
                                 context.go("/Login");
                               },
-                              child: Icon(
+                              child: const Icon(
                                 Icons.arrow_back_rounded,
                                 color: Colors.black,
                               ),

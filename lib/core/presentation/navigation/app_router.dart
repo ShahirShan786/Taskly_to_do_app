@@ -5,7 +5,7 @@ import 'package:taskly_to_do_app/core/presentation/pages/dummy_screen.dart';
 import 'package:taskly_to_do_app/core/presentation/pages/login_screen/login_screen.dart';
 import 'package:taskly_to_do_app/core/presentation/pages/on_boarding_pages/on_boarding_page_one.dart';
 import 'package:taskly_to_do_app/core/presentation/pages/sign_in/sign_in_screen.dart';
-import 'package:taskly_to_do_app/core/presentation/pages/signin_screen.dart';
+
 import 'package:taskly_to_do_app/core/presentation/pages/splash_screen/splash_screen.dart';
 import 'package:taskly_to_do_app/core/presentation/utils/widget_helper.dart';
 import 'package:go_router/go_router.dart';
@@ -39,7 +39,7 @@ final GoRouter router = GoRouter(
     GoRoute(
       path: '/',
       builder: (BuildContext context, GoRouterState state) {
-        return const SigninScreen();
+        return  const LoginScreen();
       },
       routes: <RouteBase>[
         GoRoute(
@@ -63,7 +63,7 @@ final GoRouter router = GoRouter(
           pageBuilder: (context, state) => buildPageWithDefaultTransition<void>(
             context: context,
             state: state,
-            child: const LoginScreen(),
+            child:  const LoginScreen(),
           ),
         ),
           GoRoute(

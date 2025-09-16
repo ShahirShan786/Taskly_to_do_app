@@ -1,14 +1,16 @@
-import 'package:taskly_to_do_app/core/data/datasources/remote_data_source.dart';
-import 'package:taskly_to_do_app/core/data/models/auth_user_model.dart';
-import 'package:taskly_to_do_app/core/domain/repositories/user_repository.dart';
 
-class UserRepositoryImpl implements UserRepository {
-  final RemoteDataSource _remoteDataSource;
+import 'package:taskly_to_do_app/core/data/datasources/auth_remote_data_source.dart';
+import 'package:taskly_to_do_app/core/data/models/user_model.dart';
 
-  UserRepositoryImpl(this._remoteDataSource);
+import 'package:taskly_to_do_app/core/domain/repositories/auth_repository.dart';
 
+class AuthRepositoryImpl implements AuthRepository {
+  final AuthRemoteDataSource _authRemoteDataSource;
+
+  AuthRepositoryImpl(this._authRemoteDataSource);
   @override
-  Future<AuthUserModel> authenticateUser(String email, String password) {
-    return _remoteDataSource.authenticateUser(email, password);
+  Future<AuthUserModel?> loginWithEmailAndPassword(String email, String password) {
+   return _authRemoteDataSource.singInWithEmailAndPassword(email, password);
   }
+
 }
