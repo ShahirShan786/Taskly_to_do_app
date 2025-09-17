@@ -1,44 +1,60 @@
+
+
+
+
+
+
+
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
-import 'package:taskly_to_do_app/core/presentation/notifiers/auth_notifiers.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:taskly_to_do_app/core/presentation/utils/message_generator.dart';
 import 'package:taskly_to_do_app/core/presentation/utils/theme.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:taskly_to_do_app/core/providers/provider.dart';
 
-class LoginScreen extends ConsumerStatefulWidget {
-  const LoginScreen({super.key});
+class SignUpScreen extends ConsumerStatefulWidget {
+  const SignUpScreen({super.key});
 
   @override
-  ConsumerState<LoginScreen> createState() => _LoginScreenState();
+  ConsumerState<SignUpScreen> createState() => _SignUpScreenState();
 }
 
-class _LoginScreenState extends ConsumerState<LoginScreen> {
+class _SignUpScreenState extends ConsumerState<SignUpScreen> {
+  final TextEditingController _fullNameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
   bool _obscurePassword = true;
+  bool _acceptTerms = false;
+
+ 
 
   @override
   void dispose() {
+    _fullNameController.dispose();
     _emailController.dispose();
+    _phoneController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
 
-  void _handleAuthStateChanges(AuthState? previous, AuthState next) {
-    // Handle loading state
-    if (previous?.isLoading == true && !next.isLoading) {
-      // Remove loading indicator if it was shown
-    }
-
+  void _handleAuthStateChanges(dynamic previous, dynamic next) {
     // Handle success
     if (next.user != null && next.error == null) {
-      // Navigate to home or dashboard
-      context.go('/home'); // Adjust route as needed
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Account created successfully!'),
+          backgroundColor: Colors.green,
+          duration: Duration(seconds: 2),
+        ),
+      );
+      // Navigate to login or home
+      context.go('/home');
     }
 
     // Handle error
@@ -53,14 +69,47 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     }
   }
 
+  // Validation functions
+  String? _validateFullName(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return 'Full name is required';
+    }
+    if (value.trim().length < 2) {
+      return 'Full name must be at least 2 characters';
+    }
+    if (!RegExp(r'^[a-zA-Z\s]+$').hasMatch(value.trim())) {
+      return 'Full name can only contain letters and spaces';
+    }
+    return null;
+  }
+
   String? _validateEmail(String? value) {
-    if (value == null || value.isEmpty) {
+    if (value == null || value.trim().isEmpty) {
       return MessageGenerator.getLabel('EmailRequired');
     }
 
     final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
-    if (!emailRegex.hasMatch(value)) {
+    if (!emailRegex.hasMatch(value.trim())) {
       return MessageGenerator.getLabel('InvalidEmail');
+    }
+
+    return null;
+  }
+
+  String? _validatePhone(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return 'Phone number is required';
+    }
+
+    // Remove any non-digit characters for validation
+    final digitsOnly = value.replaceAll(RegExp(r'\D'), '');
+
+    if (digitsOnly.length < 10) {
+      return 'Phone number must be at least 10 digits';
+    }
+
+    if (digitsOnly.length > 15) {
+      return 'Phone number cannot exceed 15 digits';
     }
 
     return null;
@@ -71,30 +120,68 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       return MessageGenerator.getLabel('PasswordRequired');
     }
 
-    if (value.length < 6) {
-      return MessageGenerator.getLabel('PasswordTooShort');
+    if (value.length < 8) {
+      return 'Password must be at least 8 characters';
+    }
+
+    // Check for at least one uppercase letter
+    if (!RegExp(r'[A-Z]').hasMatch(value)) {
+      return 'Password must contain at least one uppercase letter';
+    }
+
+    // Check for at least one lowercase letter
+    if (!RegExp(r'[a-z]').hasMatch(value)) {
+      return 'Password must contain at least one lowercase letter';
+    }
+
+    // Check for at least one digit
+    if (!RegExp(r'\d').hasMatch(value)) {
+      return 'Password must contain at least one number';
+    }
+
+    // Check for at least one special character
+    if (!RegExp(r'[!@#$%^&*(),.?":{}|<>]').hasMatch(value)) {
+      return 'Password must contain at least one special character';
     }
 
     return null;
   }
 
-  Future<void> _handleLogin() async {
+  Future<void> _handleSignUp() async {
+    if (!_acceptTerms) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please accept the terms and conditions'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
     if (_formKey.currentState!.validate()) {
+      final fullName = _fullNameController.text.trim();
       final email = _emailController.text.trim();
+      final phone = _phoneController.text.trim();
       final password = _passwordController.text;
 
-      await ref.read(authNotifierProvider.notifier).signIn(email, password);
+      // Call signup method from your auth notifier
+      await ref.read(authNotifierProvider.notifier).signUp(
+            fullName: fullName,
+            email: email,
+            phoneNumber: phone,
+            password: password,
+          );
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authNotifierProvider);
-
-    ref.listen<AuthState>(authNotifierProvider, (previous, next) {
+    ref.listen(authNotifierProvider, (previous, next) {
       _handleAuthStateChanges(previous, next);
     });
 
+   
     return Scaffold(
       body: Container(
         width: double.infinity,
@@ -121,7 +208,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               ),
               Container(
                 width: 305.w,
-                constraints: BoxConstraints(minHeight: 420.h),
+                constraints: BoxConstraints(minHeight: 500.h),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: const BorderRadius.all(Radius.circular(8)),
@@ -140,54 +227,103 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     key: _formKey,
                     child: Column(
                       children: [
-                        SizedBox(height: 20.h),
-                        Text(
-                          MessageGenerator.getLabel('Login'),
-                          style: Theme.of(context)
-                              .textTheme
-                              .displayLarge
-                              ?.copyWith(
-                                fontSize: 30,
-                                fontWeight: FontWeight.w800,
+                        // Back button
+                        Padding(
+                          padding: const EdgeInsets.only(top: 8, left: 8),
+                          child: Align(
+                            alignment: Alignment.centerLeft,
+                            child: GestureDetector(
+                              onTap: authState.isLoading
+                                  ? null
+                                  : () {
+                                      context.go("/Login");
+                                    },
+                              child: Icon(
+                                Icons.arrow_back_rounded,
+                                color: authState.isLoading
+                                    ? Colors.grey
+                                    : Colors.black,
                               ),
-                        ),
-                        SizedBox(height: 8.h),
-                        RichText(
-                          textAlign: TextAlign.center,
-                          text: TextSpan(
-                            style: Theme.of(context)
-                                .textTheme
-                                .labelSmall
-                                ?.copyWith(),
-                            children: <TextSpan>[
-                              TextSpan(
-                                text:
-                                    MessageGenerator.getLabel('Account_havent'),
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .headlineSmall
-                                    ?.copyWith(
-                                      color: Colors.grey[700],
-                                      fontSize: 13,
-                                    ),
-                              ),
-                              TextSpan(
-                                text: MessageGenerator.getLabel('Signup'),
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .headlineSmall
-                                    ?.copyWith(
-                                      color: appColors.appPrimay,
-                                      fontSize: 15,
-                                    ),
-                                recognizer: TapGestureRecognizer()
-                                  ..onTap = () {
-                                    context.go("/signIn");
-                                  },
-                              ),
-                            ],
+                            ),
                           ),
                         ),
+                        SizedBox(height: 10.h),
+
+                        // Title
+                        Padding(
+                          padding: const EdgeInsets.only(left: 10),
+                          child: Align(
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              MessageGenerator.getLabel('Sign Up'),
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .displayLarge
+                                  ?.copyWith(
+                                    fontSize: 30,
+                                    fontWeight: FontWeight.w800,
+                                  ),
+                            ),
+                          ),
+                        ),
+                        SizedBox(height: 8.h),
+
+                        // Login link
+                        Padding(
+                          padding: const EdgeInsets.only(left: 10),
+                          child: Align(
+                            alignment: Alignment.centerLeft,
+                            child: RichText(
+                              text: TextSpan(
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .labelSmall
+                                    ?.copyWith(),
+                                children: <TextSpan>[
+                                  TextSpan(
+                                    text: MessageGenerator.getLabel(
+                                        'Account_have'),
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .headlineSmall
+                                        ?.copyWith(
+                                          color: Colors.grey[700],
+                                          fontSize: 13,
+                                        ),
+                                  ),
+                                  TextSpan(
+                                    text: MessageGenerator.getLabel('Login'),
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .headlineSmall
+                                        ?.copyWith(
+                                          color: appColors.appPrimay,
+                                          fontSize: 15,
+                                        ),
+                                    recognizer: TapGestureRecognizer()
+                                      ..onTap = authState.isLoading
+                                          ? null
+                                          : () {
+                                              context.go("/Login");
+                                            },
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                        SizedBox(height: 16.h),
+
+                        // Full Name Field
+                        _buildInputField(
+                          label: MessageGenerator.getLabel("Full Name"),
+                          controller: _fullNameController,
+                          validator: _validateFullName,
+                          keyboardType: TextInputType.name,
+                          hintText: MessageGenerator.getLabel('John Josh'),
+                          enabled: !authState.isLoading,
+                        ),
+
                         SizedBox(height: 16.h),
 
                         // Email Field
@@ -203,6 +339,18 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
                         SizedBox(height: 16.h),
 
+                        // Phone Field
+                        _buildInputField(
+                          label: MessageGenerator.getLabel("Phone Number"),
+                          controller: _phoneController,
+                          validator: _validatePhone,
+                          keyboardType: TextInputType.phone,
+                          hintText: MessageGenerator.getLabel('988878766'),
+                          enabled: !authState.isLoading,
+                        ),
+
+                        SizedBox(height: 16.h),
+
                         // Password Field
                         _buildPasswordField(
                           label: MessageGenerator.getLabel("Password"),
@@ -211,58 +359,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           enabled: !authState.isLoading,
                         ),
 
-                        SizedBox(height: 8.h),
+                        SizedBox(height: 16.h),
 
-                        // Forgot Password
-                        Padding(
-                          padding: const EdgeInsets.only(right: 10),
-                          child: Align(
-                            alignment: Alignment.centerRight,
-                            child: GestureDetector(
-                              onTap: authState.isLoading
-                                  ? null
-                                  : () {
-                                      // Handle forgot password
-                                    },
-                              child: Text(
-                                MessageGenerator.getLabel('ForgotPassword'),
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .headlineSmall
-                                    ?.copyWith(
-                                      color: authState.isLoading
-                                          ? Colors.grey
-                                          : appColors.appPrimay,
-                                      fontSize: 13,
-                                    ),
-                              ),
-                            ),
-                          ),
-                        ),
+                        // Terms and Conditions
+                        _buildTermsCheckbox(authState),
 
                         SizedBox(height: 16.h),
 
-                        // Login Button
-                        _buildLoginButton(authState),
+                        // Sign Up Button
+                        _buildSignUpButton(authState),
 
                         SizedBox(height: 16.h),
-
-                        // Divider
-                        const Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 10),
-                          child: Row(
-                            children: [
-                              Expanded(child: Divider(endIndent: 8)),
-                              Text("OR"),
-                              Expanded(child: Divider(indent: 8)),
-                            ],
-                          ),
-                        ),
-
-                        SizedBox(height: 16.h),
-
-                        // Google Sign In Button
-                        _buildGoogleSignInButton(authState),
                       ],
                     ),
                   ),
@@ -376,7 +483,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             obscureText: _obscurePassword,
             style: Theme.of(context).textTheme.labelMedium,
             textInputAction: TextInputAction.done,
-            onFieldSubmitted: (_) => _handleLogin(),
+            onFieldSubmitted: (_) => _handleSignUp(),
             decoration: InputDecoration(
               hintText: MessageGenerator.getLabel('user@123'),
               hintStyle: Theme.of(context)
@@ -429,9 +536,78 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     );
   }
 
-  Widget _buildLoginButton(AuthState authState) {
+  Widget _buildTermsCheckbox(dynamic authState) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Checkbox(
+            value: _acceptTerms,
+            onChanged: authState.isLoading
+                ? null
+                : (value) {
+                    setState(() {
+                      _acceptTerms = value ?? false;
+                    });
+                  },
+            activeColor: appColors.appPrimay,
+          ),
+          Expanded(
+            child: GestureDetector(
+              onTap: authState.isLoading
+                  ? null
+                  : () {
+                      setState(() {
+                        _acceptTerms = !_acceptTerms;
+                      });
+                    },
+              child: Padding(
+                padding: const EdgeInsets.only(top: 12),
+                child: RichText(
+                  text: TextSpan(
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Colors.grey[700],
+                        ),
+                    children: [
+                      const TextSpan(text: 'I agree to the '),
+                      TextSpan(
+                        text: 'Terms and Conditions',
+                        style: TextStyle(
+                          color: appColors.appPrimay,
+                          decoration: TextDecoration.underline,
+                        ),
+                        recognizer: TapGestureRecognizer()
+                          ..onTap = () {
+                            // Navigate to terms and conditions
+                          },
+                      ),
+                      const TextSpan(text: ' and '),
+                      TextSpan(
+                        text: 'Privacy Policy',
+                        style: TextStyle(
+                          color: appColors.appPrimay,
+                          decoration: TextDecoration.underline,
+                        ),
+                        recognizer: TapGestureRecognizer()
+                          ..onTap = () {
+                            // Navigate to privacy policy
+                          },
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSignUpButton(dynamic authState) {
     return GestureDetector(
-      onTap: authState.isLoading ? null : _handleLogin,
+      onTap: authState.isLoading ? null : _handleSignUp,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 125, vertical: 12),
         decoration: BoxDecoration(
@@ -448,7 +624,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 ),
               )
             : Text(
-                MessageGenerator.getLabel("Login"),
+                "Sign Up",
                 style: Theme.of(context)
                     .textTheme
                     .labelLarge
@@ -457,50 +633,4 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       ),
     );
   }
-
-  // inside a ConsumerWidget / ConsumerState where `ref` is available
-Widget _buildGoogleSignInButton(AuthState authState) {
-  return GestureDetector(
-    onTap: authState.isLoading
-        ? null
-        : () async {
-            // call the notifier which wraps the usecase and updates state
-            await ref.read(authNotifierProvider.notifier).signInWithGoogle();
-          },
-    child: Container(
-      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 56),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border.all(
-          color: authState.isLoading ? Colors.grey[200]! : Colors.grey[300]!,
-        ),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          SvgPicture.asset(
-            "assets/svg/google.svg",
-            height: 18,
-            width: 18,
-            colorFilter: authState.isLoading
-                ? const ColorFilter.mode(Colors.grey, BlendMode.srcIn)
-                : null,
-          ),
-          const SizedBox(width: 12),
-          Text(
-            "Continue with Google",
-            style: TextStyle(
-              fontSize: 16,
-              color: authState.isLoading ? Colors.grey : Colors.black87,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ],
-      ),
-    ),
-  );
-}
-
 }

@@ -2,9 +2,10 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:taskly_to_do_app/core/presentation/pages/dummy_screen.dart';
+import 'package:taskly_to_do_app/core/presentation/pages/home/home_screen.dart';
 import 'package:taskly_to_do_app/core/presentation/pages/login_screen/login_screen.dart';
 import 'package:taskly_to_do_app/core/presentation/pages/on_boarding_pages/on_boarding_page_one.dart';
-import 'package:taskly_to_do_app/core/presentation/pages/sign_in/sign_in_screen.dart';
+import 'package:taskly_to_do_app/core/presentation/pages/sign_up/sign_up_screen.dart';
 
 import 'package:taskly_to_do_app/core/presentation/pages/splash_screen/splash_screen.dart';
 import 'package:taskly_to_do_app/core/presentation/utils/widget_helper.dart';
@@ -71,7 +72,7 @@ final GoRouter router = GoRouter(
           pageBuilder: (context, state) => buildPageWithDefaultTransition<void>(
             context: context,
             state: state,
-            child: const SignInScreen(),
+            child: const SignUpScreen(),
           ),
         ),
         GoRoute(
@@ -87,7 +88,7 @@ final GoRouter router = GoRouter(
           pageBuilder: (context, state) => buildPageWithDefaultTransition<void>(
             context: context,
             state: state,
-            child: const DummyScreen(text: "Home Screen"),
+            child: const HomeScreen(),
           ),
         ),
       ],

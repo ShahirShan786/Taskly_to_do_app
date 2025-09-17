@@ -10,7 +10,17 @@ class AuthRepositoryImpl implements AuthRepository {
   AuthRepositoryImpl(this._authRemoteDataSource);
   @override
   Future<AuthUserModel?> loginWithEmailAndPassword(String email, String password) {
-   return _authRemoteDataSource.singInWithEmailAndPassword(email, password);
+   return _authRemoteDataSource.signInWithEmailAndPassword(email, password);
+  }
+  
+  @override
+  Future<AuthUserModel?> createUserWithEmailAndPassword({required String fullName, required String email, required String phoneNumber, required String password}) {
+    return _authRemoteDataSource.createUserWithEmailAndPassword(fullName: fullName, email: email, phoneNumber: phoneNumber, password: password);
+  }
+  
+  @override
+  Future<AuthUserModel> signInWithGoogle() {
+    return _authRemoteDataSource.signInwithGoogle();
   }
 
 }

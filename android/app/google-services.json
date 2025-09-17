@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "192598463773-b9m1vfb5360vtiml22s4566inu0imnf2.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.taskly_to_do_app",
+            "certificate_hash": "3314fc0e949f639dabbc086c1e4dd77a917e1c79"
+          }
+        },
+        {
           "client_id": "192598463773-b5h9kvfvmugqutkjhs8loo48dagsd542.apps.googleusercontent.com",
           "client_type": 3
         }
