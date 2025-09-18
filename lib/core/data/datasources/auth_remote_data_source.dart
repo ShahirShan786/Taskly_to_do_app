@@ -69,7 +69,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       final user = credential.user;
       if (user != null) {
         // Store additional details in Firestore
-        await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+        await FirebaseFirestore.instance.collection('Users').doc(user.uid).set({
           'fullName': fullName,
           'email': email,
           'phoneNumber': phoneNumber,

@@ -38,7 +38,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     // Handle success
     if (next.user != null && next.error == null) {
       // Navigate to home or dashboard
-      context.go('/home'); // Adjust route as needed
+      context.go('/dashboard'); // Adjust route as needed
     }
 
     // Handle error
@@ -459,48 +459,47 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 
   // inside a ConsumerWidget / ConsumerState where `ref` is available
-Widget _buildGoogleSignInButton(AuthState authState) {
-  return GestureDetector(
-    onTap: authState.isLoading
-        ? null
-        : () async {
-            // call the notifier which wraps the usecase and updates state
-            await ref.read(authNotifierProvider.notifier).signInWithGoogle();
-          },
-    child: Container(
-      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 56),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border.all(
-          color: authState.isLoading ? Colors.grey[200]! : Colors.grey[300]!,
+  Widget _buildGoogleSignInButton(AuthState authState) {
+    return GestureDetector(
+      onTap: authState.isLoading
+          ? null
+          : () async {
+              // call the notifier which wraps the usecase and updates state
+              await ref.read(authNotifierProvider.notifier).signInWithGoogle();
+            },
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 56),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          border: Border.all(
+            color: authState.isLoading ? Colors.grey[200]! : Colors.grey[300]!,
+          ),
+          borderRadius: BorderRadius.circular(8),
         ),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          SvgPicture.asset(
-            "assets/svg/google.svg",
-            height: 18,
-            width: 18,
-            colorFilter: authState.isLoading
-                ? const ColorFilter.mode(Colors.grey, BlendMode.srcIn)
-                : null,
-          ),
-          const SizedBox(width: 12),
-          Text(
-            "Continue with Google",
-            style: TextStyle(
-              fontSize: 16,
-              color: authState.isLoading ? Colors.grey : Colors.black87,
-              fontWeight: FontWeight.w500,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            SvgPicture.asset(
+              "assets/svg/google.svg",
+              height: 18,
+              width: 18,
+              colorFilter: authState.isLoading
+                  ? const ColorFilter.mode(Colors.grey, BlendMode.srcIn)
+                  : null,
             ),
-          ),
-        ],
+            const SizedBox(width: 12),
+            Text(
+              "Continue with Google",
+              style: TextStyle(
+                fontSize: 16,
+                color: authState.isLoading ? Colors.grey : Colors.black87,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
       ),
-    ),
-  );
-}
-
+    );
+  }
 }

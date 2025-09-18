@@ -109,6 +109,10 @@ abstract class AppColors {
   final Color appBarBg;
   final Color appPrimay;
   final Color appWhite;
+  final Color customGray;
+  final Color appRed;
+  final Color appYellow;
+  final Color appGreen;
   final Color progressCircleBg;
   final Color pleasantButtonBg;
   final Color pleasantButtonBgHover;
@@ -148,6 +152,10 @@ abstract class AppColors {
       required this.appBarBg,
       required this.appWhite,
       required this.appPrimay,
+      required this.customGray,
+      required this.appRed,
+      required this.appYellow,
+      required this.appGreen,
       required this.progressCircleBg,
       required this.pleasantButtonBg,
       required this.negativeButtonBg,
@@ -188,6 +196,11 @@ class AppColorsLight extends AppColors {
           appBarBg: const Color.fromRGBO(255, 255, 255, 1),
           appWhite: Colors.white,
           appPrimay: const Color(0xFFED6E1A),
+          customGray: const Color(0xFF767E8C),
+          appRed:  const Color(0xFFEA4335),
+          appYellow: const Color(0xFFED9611),
+          appGreen: const Color(0xFF23A26D)
+,
           progressCircleBg: Colors.black,
           pleasantButtonBg: const Color.fromRGBO(36, 107, 253, 1),
           pleasantButtonBgHover: const Color.fromRGBO(2, 67, 199, 1.0),
@@ -250,6 +263,10 @@ class AppColorsDark extends AppColors {
           appBarBg: Colors.black,
           appWhite: Colors.white,
           appPrimay: const Color(0xFFFF6C0A),
+          customGray: const  Color(0xFF767E8C),
+           appRed:  const Color(0xFFEA4335),
+          appYellow: const Color(0xFFED9611),
+          appGreen: const Color(0xFF23A26D),
           progressCircleBg: Colors.white,
           pleasantButtonBg: const Color.fromRGBO(36, 107, 253, 1),
           pleasantButtonBgHover: const Color.fromRGBO(2, 67, 199, 1.0),

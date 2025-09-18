@@ -51,7 +51,8 @@ class AuthNotifiers extends StateNotifier<AuthState> {
   final SignupUsecase signupUsecase;
   final GoogleSignInUsecase googleSignInUsecase;
 
-  AuthNotifiers(this.signinUsecase, this.signupUsecase , this.googleSignInUsecase)
+  AuthNotifiers(
+      this.signinUsecase, this.signupUsecase, this.googleSignInUsecase)
       : super(const AuthState());
 
   Future<void> signIn(String email, String password) async {
@@ -98,11 +99,11 @@ class AuthNotifiers extends StateNotifier<AuthState> {
       if (fullName.trim().isEmpty ||
           email.trim().isEmpty ||
           phoneNumber.trim().isEmpty ||
-          password.trim().isEmpty){
-            throw Exception("All fields are required");
-          } 
+          password.trim().isEmpty) {
+        throw Exception("All fields are required");
+      }
 
-            // Email format validation
+      // Email format validation
       final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
       if (!emailRegex.hasMatch(email.trim())) {
         throw Exception('Please enter a valid email address');
@@ -113,9 +114,13 @@ class AuthNotifiers extends StateNotifier<AuthState> {
         throw Exception('Password must be at least 8 characters long');
       }
 
-      final user = await signupUsecase.call(fullName: fullName, email: email, phoneNumber: phoneNumber, password: password);
+      final user = await signupUsecase.call(
+          fullName: fullName,
+          email: email,
+          phoneNumber: phoneNumber,
+          password: password);
 
-      if(user == null){
+      if (user == null) {
         throw Exception('Account creation failed. Please try again');
       }
 
@@ -124,44 +129,35 @@ class AuthNotifiers extends StateNotifier<AuthState> {
         user: user,
         error: null,
       );
+    } catch (e) {
+      state = state.copyWith(isLoading: false, error: _getErrorMessage(e));
+    }
+  }
 
-      
+  Future<void> signInWithGoogle() async {
+    state = state.copyWith(isLoading: true, error: null);
+    try {
+      final user = await googleSignInUsecase.signInwithGoogle();
+
+      state = state.copyWith(
+        isLoading: false,
+        user: user,
+        error: null,
+      );
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
-        error: _getErrorMessage(e)
+        error: _getErrorMessage(e),
       );
     }
   }
-
-   Future<void> signInWithGoogle() async {
-  state = state.copyWith(isLoading: true, error: null);
-  try {
-    final user = await googleSignInUsecase.signInwithGoogle(); 
-
-    if (user == null) {
-      throw Exception("Google Sign-In failed");
-    }
-
-    state = state.copyWith(
-      isLoading: false,
-      user: user,
-      error: null,
-    );
-  } catch (e) {
-    state = state.copyWith(
-      isLoading: false,
-      error: _getErrorMessage(e),
-    );
-  }
-}
 
   Future<void> signOut() async {
     state = state.copyWith(isLoading: true, error: null);
 
     try {
       await FirebaseAuth.instance.signOut();
-      
+
       // Clear the state
       state = state.copyWith(
         isLoading: false,

@@ -20,7 +20,7 @@ class AuthRepositoryImpl implements AuthRepository {
   
   @override
   Future<AuthUserModel> signInWithGoogle() {
-    return _authRemoteDataSource.signInwithGoogle();
+    return _authRemoteDataSource.signInwithGoogle();  
   }
 
 }
