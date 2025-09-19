@@ -24,3 +24,4 @@ final taskUsecaseProvider = Provider<TaskUsecases>((ref){
 final taskNotifierProvider = StateNotifierProvider<TaskNotifiers , AsyncValue<List<TodoModel>>>((ref){
   return TaskNotifiers(ref.watch(taskUsecaseProvider));
 });
+

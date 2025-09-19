@@ -14,7 +14,13 @@ class TaskUsecases {
     return taskRepository.getAllTask();
   }
 
+  Future<void> updateTask(TodoModel task , String taskId){
+    return taskRepository.updateTask(task, taskId);
+  }
+
   Future<void> deleteTask(String taskId){
     return taskRepository.deleteTask(taskId);
   }
+
+  
 }

@@ -31,7 +31,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   @override
   void dispose() {
-    // TODO: implement dispose
     super.dispose();
     _titleController.clear();
     _descriptionController.clear();
@@ -80,376 +79,366 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     border: OutlineInputBorder(
                         borderSide: BorderSide.none,
                         borderRadius: BorderRadius.circular(10))),
+                onChanged: (value) {
+                  ref.read(searchQueryProvider.notifier).state = value;
+                },
               ),
               SizedBox(
                 height: 10.h,
               ),
               Expanded(
                 child: ref.watch(taskNotifierProvider).when(
-                      data: (tasks) => ListView.builder(
-                        itemCount: tasks.length,
-                        itemBuilder: (context, index) {
-                          final task = tasks[index];
-                          final formattedDate = task.dueDate != null
-                              ? DateFormat('EEE, dd MMM yyyy')
-                                  .format(task.dueDate!)
-                              : "No date";
+                      data: (tasks) {
+                        final searchQuery = ref.watch(searchQueryProvider);
+                        final filteredTasks = tasks
+                            .where((task) => task.title
+                                .toLowerCase()
+                                .contains(searchQuery.toLowerCase()))
+                            .toList();
 
-                          final formattedTime = task.dueTime != null
-                              ? DateFormat('hh:mm a').format(
-                                  DateTime(0, 1, 1, task.dueTime!.hour,
-                                      task.dueTime!.minute),
-                                )
-                              : "No time";
-                          return Padding(
-                            padding: EdgeInsets.symmetric(vertical: 10.h),
-                            child: Container(
-                              width: double.infinity,
-                              constraints: const BoxConstraints(minHeight: 180),
-                              decoration: BoxDecoration(
-                                  color: Colors.grey[300],
-                                  borderRadius: BorderRadius.circular(13.r)),
-                              child: Column(
-                                children: [
-                                  Container(
-                                    width: double.infinity,
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 15),
-                                    decoration: BoxDecoration(
-                                      color: getPriorityColor(task.priority),
-                                      borderRadius: BorderRadius.vertical(
-                                          top: Radius.circular(13.r)),
-                                    ),
-                                    alignment: Alignment.center,
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Row(
-                                          children: [
-                                            const Icon(
-                                              Icons.flag_outlined,
-                                              color: Colors.white,
-                                            ),
-                                            Text(
-                                              MessageGenerator.getLabel(
-                                                  "${task.priority.name} Priority"),
-                                              style: Theme.of(context)
-                                                  .textTheme
-                                                  .titleMedium
-                                                  ?.copyWith(
-                                                      color:
-                                                          appColors.appWhite),
-                                            ),
-                                            Icon(
-                                              getPriorityIcon(task.priority),
-                                              color: Colors.yellow,
-                                              size: 18.h,
-                                            ),
-                                          ],
-                                        ),
-                                        PopupMenuButton<String>(
-                                          icon: Icon(
-                                            Icons.more_horiz,
-                                            size: 25.h,
+                        if (filteredTasks.isEmpty) {
+                          return Center(
+                            child: Text(
+                              searchQuery.isEmpty
+                                  ? "No tasks available."
+                                  : "No tasks found for \"$searchQuery\".",
+                              style: Theme.of(context).textTheme.titleMedium,
+                            ),
+                          );
+                        }
+                        return ListView.builder(
+                          itemCount: filteredTasks.length,
+                          itemBuilder: (context, index) {
+                            final task = filteredTasks[index];
+                            final formattedDate = task.dueDate != null
+                                ? DateFormat('EEE, dd MMM yyyy')
+                                    .format(task.dueDate!)
+                                : "No date";
+
+                            final formattedTime = task.dueTime != null
+                                ? DateFormat('hh:mm a').format(
+                                    DateTime(0, 1, 1, task.dueTime!.hour,
+                                        task.dueTime!.minute),
+                                  )
+                                : "No time";
+                            return Padding(
+                              padding: EdgeInsets.symmetric(vertical: 10.h),
+                              child: Container(
+                                width: double.infinity,
+                                constraints:
+                                    const BoxConstraints(minHeight: 180),
+                                decoration: BoxDecoration(
+                                    color: Colors.grey[300],
+                                    borderRadius: BorderRadius.circular(13.r)),
+                                child: Column(
+                                  children: [
+                                    Container(
+                                      width: double.infinity,
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 15),
+                                      decoration: BoxDecoration(
+                                        color: getPriorityColor(task.priority),
+                                        borderRadius: BorderRadius.vertical(
+                                            top: Radius.circular(13.r)),
+                                      ),
+                                      alignment: Alignment.center,
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Row(
+                                            children: [
+                                              const Icon(
+                                                Icons.flag_outlined,
+                                                color: Colors.white,
+                                              ),
+                                              Text(
+                                                MessageGenerator.getLabel(
+                                                    "${task.priority.name} Priority"),
+                                                style: Theme.of(context)
+                                                    .textTheme
+                                                    .titleMedium
+                                                    ?.copyWith(
+                                                        color:
+                                                            appColors.appWhite),
+                                              ),
+                                              Icon(
+                                                getPriorityIcon(task.priority),
+                                                color: Colors.yellow,
+                                                size: 18.h,
+                                              ),
+                                            ],
                                           ),
-                                          onSelected: (value) async {
-                                            if (value == 'edit') {
-                                              // handle edit
-                                            } else if (value == 'delete') {
-                                              final confirmed =
-                                                  await showDialog<bool>(
-                                                context: context,
-                                                builder: (c) => AlertDialog(
-                                                  title: const Text(
-                                                      'Delete task?'),
-                                                  content: const Text(
-                                                      'This action cannot be undone.'),
-                                                  actions: [
-                                                    TextButton(
-                                                        onPressed: () =>
-                                                            Navigator.pop(
-                                                                c, false),
-                                                        child: const Text(
-                                                            'Cancel')),
-                                                    TextButton(
-                                                        onPressed: () =>
-                                                            Navigator.pop(
-                                                                c, true),
-                                                        child: const Text(
-                                                            'Delete')),
-                                                  ],
-                                                ),
-                                              );
+                                          PopupMenuButton<String>(
+                                            icon: Icon(
+                                              Icons.more_horiz,
+                                              size: 25.h,
+                                            ),
+                                            onSelected: (value) async {
+                                              if (value == 'edit') {
+                                                context.go('/edit',
+                                                    extra: task);
+                                              } else if (value == 'delete') {
+                                                final confirmed =
+                                                    await showDialog<bool>(
+                                                  context: context,
+                                                  builder: (c) => AlertDialog(
+                                                    title: const Text(
+                                                        'Delete task?'),
+                                                    content: const Text(
+                                                        'This action cannot be undone.'),
+                                                    actions: [
+                                                      TextButton(
+                                                          onPressed: () =>
+                                                              Navigator.pop(
+                                                                  c, false),
+                                                          child: const Text(
+                                                              'Cancel')),
+                                                      TextButton(
+                                                          onPressed: () =>
+                                                              Navigator.pop(
+                                                                  c, true),
+                                                          child: const Text(
+                                                              'Delete')),
+                                                    ],
+                                                  ),
+                                                );
 
-                                              if (confirmed == true) {
-                                                try {
-                                                  await ref
-                                                      .read(taskNotifierProvider
-                                                          .notifier)
-                                                      .deleteTask(task.id);
-                                                  ScaffoldMessenger.of(context)
-                                                      .showSnackBar(const SnackBar(
-                                                          content: Text(
-                                                              'Task deleted')));
-                                                } catch (e) {
-                                                  ScaffoldMessenger.of(context)
-                                                      .showSnackBar(SnackBar(
-                                                          content: Text(
-                                                              'Delete failed: $e')));
+                                                if (confirmed == true) {
+                                                  try {
+                                                    await ref
+                                                        .read(
+                                                            taskNotifierProvider
+                                                                .notifier)
+                                                        .deleteTask(task.id);
+                                                    ScaffoldMessenger.of(
+                                                            context)
+                                                        .showSnackBar(
+                                                            const SnackBar(
+                                                                content: Text(
+                                                                    'Task deleted')));
+                                                  } catch (e) {
+                                                    ScaffoldMessenger.of(
+                                                            context)
+                                                        .showSnackBar(SnackBar(
+                                                            content: Text(
+                                                                'Delete failed: $e')));
+                                                  }
                                                 }
                                               }
-                                            }
-                                          },
-                                          itemBuilder: (context) => [
-                                            PopupMenuItem<String>(
-                                              height: 5.h,
-                                              value: 'edit',
-                                              child: SizedBox(
-                                                width: 80.w,
-                                                height: 25.h,
-                                                child: Row(
-                                                  children: [
-                                                    Icon(
-                                                      Icons.edit,
-                                                      size: 15.h,
-                                                      color: appColors.appRed,
-                                                    ),
-                                                    SizedBox(
-                                                        width: 8
-                                                            .w), // 👈 instead of spacing
-                                                    Text(
-                                                      "Edit",
-                                                      style: TextStyle(
-                                                          fontSize: 16),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                            ),
-                                            PopupMenuDivider(),
-                                            PopupMenuItem<String>(
-                                              height: 5.h,
-                                              value: 'delete',
-                                              child: SizedBox(
-                                                width: 80.w,
-                                                height: 25.h,
-                                                child: Row(
-                                                  children: [
-                                                    Icon(
-                                                      Icons.delete,
-                                                      size: 15.h,
-                                                      color: appColors.appRed,
-                                                    ),
-                                                    SizedBox(width: 8.w),
-                                                    Text(
-                                                      "Delete",
-                                                      style: TextStyle(
-                                                          fontSize: 16),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                            ),
-                                          ],
-                                        )
-                                      ],
-                                    ),
-                                  ),
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 15, vertical: 15),
-                                    child: Column(
-                                      children: [
-                                        Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            Row(
-                                              spacing: 10.w,
-                                              children: [
-                                                Container(
-                                                  width: 22.h,
-                                                  height: 22.h,
-                                                  decoration: BoxDecoration(
-                                                      shape: BoxShape.circle,
-                                                      color: appColors.appWhite,
-                                                      border: Border.all(
-                                                          color:
-                                                              appColors.appRed,
-                                                          width: 2)),
-                                                  child: Center(
-                                                    child: CircleAvatar(
-                                                      radius: 4.r,
-                                                      backgroundColor:
-                                                          appColors.appRed,
-                                                    ),
+                                            },
+                                            itemBuilder: (context) => [
+                                              PopupMenuItem<String>(
+                                                height: 5.h,
+                                                value: 'edit',
+                                                child: SizedBox(
+                                                  width: 80.w,
+                                                  height: 25.h,
+                                                  child: Row(
+                                                    children: [
+                                                      Icon(
+                                                        Icons.edit,
+                                                        size: 15.h,
+                                                        color: appColors.appRed,
+                                                      ),
+                                                      SizedBox(width: 8.w),
+                                                      const Text(
+                                                        "Edit",
+                                                        style: TextStyle(
+                                                            fontSize: 16),
+                                                      ),
+                                                    ],
                                                   ),
                                                 ),
-                                                Text(
-                                                    MessageGenerator.getLabel(
-                                                        task.title),
-                                                    style: Theme.of(context)
-                                                        .textTheme
-                                                        .titleLarge
-                                                        ?.copyWith(
-                                                            fontSize: 20,
-                                                            fontWeight:
-                                                                FontWeight
-                                                                    .w500)),
-                                              ],
-                                            ),
-                                            Container(
-                                              padding: EdgeInsets.symmetric(
-                                                  horizontal: 20.w,
-                                                  vertical: 4.h),
-                                              decoration: BoxDecoration(
-                                                  color: Colors.blueAccent,
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                          20)),
-                                              child: Text(
-                                                  MessageGenerator.getLabel(
-                                                      "To-Do"),
-                                                  style: Theme.of(context)
-                                                      .textTheme
-                                                      .labelLarge
-                                                      ?.copyWith(fontSize: 16)),
-                                            )
-                                          ],
-                                        ),
-                                        SizedBox(
-                                          height: 10.h,
-                                        ),
-                                        Align(
-                                          alignment: Alignment.centerLeft,
-                                          child: Text(task.description,
-                                              textAlign: TextAlign.left,
-                                              style: Theme.of(context)
-                                                  .textTheme
-                                                  .labelMedium
-                                                  ?.copyWith(
-                                                      color: appColors
-                                                          .customGray)),
-                                        ),
-                                        SizedBox(
-                                          height: 8.h,
-                                        ),
-                                        Divider(
-                                          color: Colors.grey[500],
-                                          thickness: 1,
-                                        ),
-                                        Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            Row(
-                                              spacing: 5.w,
-                                              children: [
-                                                Icon(
-                                                  Icons.access_time,
-                                                  size: 15.h,
+                                              ),
+                                              const PopupMenuDivider(),
+                                              PopupMenuItem<String>(
+                                                height: 5.h,
+                                                value: 'delete',
+                                                child: SizedBox(
+                                                  width: 80.w,
+                                                  height: 25.h,
+                                                  child: Row(
+                                                    children: [
+                                                      Icon(
+                                                        Icons.delete,
+                                                        size: 15.h,
+                                                        color: appColors.appRed,
+                                                      ),
+                                                      SizedBox(width: 8.w),
+                                                      const Text(
+                                                        "Delete",
+                                                        style: TextStyle(
+                                                            fontSize: 16),
+                                                      ),
+                                                    ],
+                                                  ),
                                                 ),
-                                                Text(formattedTime,
+                                              ),
+                                            ],
+                                          )
+                                        ],
+                                      ),
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 15, vertical: 15),
+                                      child: Column(
+                                        children: [
+                                          Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              Row(
+                                                spacing: 10.w,
+                                                children: [
+                                                  Container(
+                                                    width: 22.h,
+                                                    height: 22.h,
+                                                    decoration: BoxDecoration(
+                                                        shape: BoxShape.circle,
+                                                        color:
+                                                            appColors.appWhite,
+                                                        border: Border.all(
+                                                            color: appColors
+                                                                .appRed,
+                                                            width: 2)),
+                                                    child: Center(
+                                                      child: CircleAvatar(
+                                                        radius: 4.r,
+                                                        backgroundColor:
+                                                            appColors.appRed,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  Text(
+                                                      MessageGenerator.getLabel(
+                                                          task.title),
+                                                      style: Theme.of(context)
+                                                          .textTheme
+                                                          .titleLarge
+                                                          ?.copyWith(
+                                                              fontSize: 20,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w500)),
+                                                ],
+                                              ),
+                                              Container(
+                                                padding: EdgeInsets.symmetric(
+                                                    horizontal: 20.w,
+                                                    vertical: 4.h),
+                                                decoration: BoxDecoration(
+                                                    color: task.status ==
+                                                            TaskStatus.Pending
+                                                        ? Colors.blueAccent
+                                                        : Colors
+                                                            .green, // Completed is green
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            20)),
+                                                child: GestureDetector(
+                                                  onTap: () async {
+                                                    // Toggle status
+                                                    final updatedTask =
+                                                        task.copyWith(
+                                                            status: task.status ==
+                                                                    TaskStatus
+                                                                        .Pending
+                                                                ? TaskStatus
+                                                                    .Completed
+                                                                : TaskStatus
+                                                                    .Pending);
+
+                                                    // Call your notifier's update method
+                                                    await ref
+                                                        .read(
+                                                            taskNotifierProvider
+                                                                .notifier)
+                                                        .updateTask(updatedTask,
+                                                            task.id);
+                                                  },
+                                                  child: Text(
+                                                    task.status ==
+                                                            TaskStatus.Pending
+                                                        ? "To-Do"
+                                                        : "Completed",
                                                     style: Theme.of(context)
                                                         .textTheme
-                                                        .labelMedium)
-                                              ],
-                                            ),
-                                            Text(formattedDate,
+                                                        .labelLarge
+                                                        ?.copyWith(
+                                                            fontSize: 16,
+                                                            color:
+                                                                Colors.white),
+                                                  ),
+                                                ),
+                                              )
+                                            ],
+                                          ),
+                                          SizedBox(
+                                            height: 10.h,
+                                          ),
+                                          Align(
+                                            alignment: Alignment.centerLeft,
+                                            child: Text(task.description,
+                                                textAlign: TextAlign.left,
                                                 style: Theme.of(context)
                                                     .textTheme
                                                     .labelMedium
                                                     ?.copyWith(
                                                         color: appColors
-                                                            .customGray,
-                                                        fontSize: 15,
-                                                        fontWeight:
-                                                            FontWeight.w700))
-                                          ],
-                                        )
-                                      ],
+                                                            .customGray)),
+                                          ),
+                                          SizedBox(
+                                            height: 8.h,
+                                          ),
+                                          Divider(
+                                            color: Colors.grey[500],
+                                            thickness: 1,
+                                          ),
+                                          Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              Row(
+                                                spacing: 5.w,
+                                                children: [
+                                                  Icon(
+                                                    Icons.access_time,
+                                                    size: 15.h,
+                                                  ),
+                                                  Text(formattedTime,
+                                                      style: Theme.of(context)
+                                                          .textTheme
+                                                          .labelMedium)
+                                                ],
+                                              ),
+                                              Text(formattedDate,
+                                                  style: Theme.of(context)
+                                                      .textTheme
+                                                      .labelMedium
+                                                      ?.copyWith(
+                                                          color: appColors
+                                                              .customGray,
+                                                          fontSize: 15,
+                                                          fontWeight:
+                                                              FontWeight.w700))
+                                            ],
+                                          )
+                                        ],
+                                      ),
                                     ),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
-                            ),
-                          );
-                        },
-                      ),
+                            );
+                          },
+                        );
+                      },
                       loading: () =>
                           const Center(child: CircularProgressIndicator()),
                       error: (e, _) => Center(child: Text("Error: $e")),
                     ),
-              ),
-            ],
-          ),
-        ),
-        drawer: Drawer(
-          shape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.only(
-              topRight: Radius.circular(24),
-              bottomRight: Radius.circular(24),
-            ),
-          ),
-          child: Column(
-            children: [
-              const DrawerHeader(
-                decoration: BoxDecoration(color: Colors.white),
-                child: Row(
-                  children: [
-                    CircleAvatar(
-                      radius: 30,
-                      backgroundColor: Colors.grey,
-                      child: Icon(Icons.person, size: 40, color: Colors.white),
-                    ),
-                    SizedBox(width: 16),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          "Shahir Mon KS",
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black,
-                          ),
-                        ),
-                        Text(
-                          "shahir@example.com",
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.grey,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              const ListTile(
-                leading: Icon(Icons.home, color: Colors.black),
-                title: Text("Home"),
-                onTap: null,
-              ),
-              const ListTile(
-                leading: Icon(Icons.favorite, color: Colors.black),
-                title: Text("Favorites"),
-                onTap: null,
-              ),
-              const ListTile(
-                leading: Icon(Icons.settings, color: Colors.black),
-                title: Text("Settings"),
-                onTap: null,
-              ),
-              const Spacer(),
-              const Divider(),
-              ListTile(
-                leading: const Icon(Icons.logout, color: Colors.red),
-                title:
-                    const Text("Logout", style: TextStyle(color: Colors.red)),
-                onTap: () => showSignOutDialog(context, ref),
               ),
             ],
           ),

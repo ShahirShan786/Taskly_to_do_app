@@ -14,3 +14,9 @@ final selectedTimeProvider = StateProvider<TimeOfDay?>((ref)=> null);
 
 // priority Provider
 final selectedPriorityProvider = StateProvider<Priority?>((ref)=> null);
+
+// edit provider
+final isEditProvider = StateProvider.family<bool , String>((ref , taskId) => false);
+
+// search provider
+final searchQueryProvider = StateProvider<String>((ref)=> '');

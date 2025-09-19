@@ -5,11 +5,13 @@ import 'package:taskly_to_do_app/core/data/models/todo_model.dart';
 abstract class TaskRemoteDataSource {
   Future<TodoModel> createTask(TodoModel task);
   Stream<List<TodoModel>> getAllTask();
+  Future<void> updateTask(TodoModel task , String taskId);
   Future<void> deleteTask(String taskId);
 }
 
 class TaskRemoteDataSourceImpl implements TaskRemoteDataSource {
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
+  
   @override
   Future<TodoModel> createTask(TodoModel task) async {
     try {
@@ -80,5 +82,25 @@ class TaskRemoteDataSourceImpl implements TaskRemoteDataSource {
    }catch(e){
     throw Exception("Failed to delete task :$e");
    }
+  }
+  
+  @override
+  Future<void> updateTask(TodoModel task , String taskId)async {
+    try{
+       final user = FirebaseAuth.instance.currentUser;
+    if(user == null) throw Exception("User not logged in");
+
+    final docRef = firestore
+                   .collection('Users')
+                   .doc(user.uid)
+                   .collection('todos')
+                   .doc(taskId);
+
+    await docRef.update(task.toMap());
+
+
+    }catch(e){
+      throw Exception("Failed to update task $e");
+    }
   }
 }

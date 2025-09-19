@@ -26,6 +26,11 @@ class TaskRepositoryImpl  implements TaskRepository{
   Future<void> deleteTask(String taskId) {
     return taskRemoteDataSource.deleteTask(taskId);
   }
+  
+  @override
+  Future<void> updateTask(TodoModel task, String taskId) {
+    return taskRemoteDataSource.updateTask(task, taskId);
+  }
 
   
 }

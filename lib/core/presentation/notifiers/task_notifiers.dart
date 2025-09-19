@@ -34,6 +34,16 @@ class TaskNotifiers  extends StateNotifier<AsyncValue<List<TodoModel>>>{
     });
   }
 
+  Future<void> updateTask(TodoModel task , String taskId)async{
+    
+    try{
+      await taskUsecases.updateTask(task, taskId);
+    }catch(e ,st){
+      state = AsyncValue.error(e, st);
+    } 
+    
+     }
+
   Future<void> deleteTask(String taskId)async{
     try{
       await taskUsecases.deleteTask(taskId);
@@ -41,4 +51,6 @@ class TaskNotifiers  extends StateNotifier<AsyncValue<List<TodoModel>>>{
       state = AsyncValue.error(e, st);
     }
   }
+
+
 }
